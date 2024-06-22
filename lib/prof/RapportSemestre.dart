@@ -70,78 +70,116 @@ class _RapportSemestreState extends State<RapportSemestre> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Student Report'),
+        title: Text('Rapport Semestriel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: Color.fromARGB(255, 86, 148, 220),
+        elevation: 0,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color.fromARGB(255, 86, 148, 220)!, Colors.blue[200]!],
+          ),
+        ),
+        child: ListView(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                DropdownButton<String>(
-                  hint: Text('Select Niveau'),
-                  value: selectedNiveau,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedNiveau = value;
-                      fetchModules();
-                    });
-                  },
-                  items: niveaux.map((niveau) {
-                    return DropdownMenuItem<String>(
-                      value: niveau,
-                      child: Text(niveau),
-                    );
-                  }).toList(),
-                ),
-                SizedBox(width: 16.0),
-                DropdownButton<String>(
-                  hint: Text('Select Module'),
-                  value: selectedModule,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedModule = value;
-                    });
-                  },
-                  items: modules.map((module) {
-                    return DropdownMenuItem<String>(
-                      value: module,
-                      child: Text(module),
-                    );
-                  }).toList(),
-                ),
-                SizedBox(width: 16.0),
-                ElevatedButton(
-                  onPressed: () {
-                    if (selectedNiveau != null && selectedModule != null) {
-                      fetchReport(selectedNiveau!, selectedModule!);
-                    }
-                  },
-                  child: Text('Generate Report'),
-                ),
-              ],
-            ),
-            SizedBox(height: 24.0),
-            Expanded(
-              child: report.isEmpty
-                  ? Center(child: CircularProgressIndicator())
-                  : SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('Nom')),
-                    DataColumn(label: Text('Prénom')),
-                    DataColumn(label: Text('Présence (%)')),
-                  ],
-                  rows: report.map((row) {
-                    return DataRow(cells: [
-                      DataCell(Text(row['student_nom'])),
-                      DataCell(Text(row['student_prenom'])),
-                      DataCell(Text(row['presence_percentage'].toStringAsFixed(2))),
-                    ]);
-                  }).toList(),
-                ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Card(
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              labelText: 'Niveau',
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            value: selectedNiveau,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedNiveau = value;
+                                fetchModules();
+                              });
+                            },
+                            items: niveaux.map((niveau) {
+                              return DropdownMenuItem<String>(
+                                value: niveau,
+                                child: Text(niveau),
+                              );
+                            }).toList(),
+                          ),
+                          SizedBox(height: 16),
+                          DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              labelText: 'Module',
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            value: selectedModule,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedModule = value;
+                              });
+                            },
+                            items: modules.map((module) {
+                              return DropdownMenuItem<String>(
+                                value: module,
+                                child: Text(module),
+                              );
+                            }).toList(),
+                          ),
+                          SizedBox(height: 16),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white, backgroundColor: Colors.blue[800],
+                              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            onPressed: () {
+                              if (selectedNiveau != null && selectedModule != null) {
+                                fetchReport(selectedNiveau!, selectedModule!);
+                              }
+                            },
+                            child: Text('Générer le Rapport', style: TextStyle(fontSize: 16)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  Card(
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: report.isEmpty
+                          ? Center(child: CircularProgressIndicator())
+                          : SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: DataTable(
+                                headingRowColor: MaterialStateProperty.all(Colors.blue[100]),
+                                columns: const [
+                                  DataColumn(label: Text('Nom', style: TextStyle(fontWeight: FontWeight.bold))),
+                                  DataColumn(label: Text('Prénom', style: TextStyle(fontWeight: FontWeight.bold))),
+                                  DataColumn(label: Text('Présence (%)', style: TextStyle(fontWeight: FontWeight.bold))),
+                                ],
+                                rows: report.map((row) {
+                                  return DataRow(cells: [
+                                    DataCell(Text(row['student_nom'])),
+                                    DataCell(Text(row['student_prenom'])),
+                                    DataCell(Text(row['presence_percentage'].toStringAsFixed(2))),
+                                  ]);
+                                }).toList(),
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

@@ -138,6 +138,50 @@ Future<void> doLogout() async {
     );
   }
 }
+
+Future<void> showLogoutConfirmationDialog() async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // L'utilisateur doit toucher un bouton pour fermer la boîte de dialogue
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Confirmation de déconnexion'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
+              Text('Vous ne pourrez pas vous reconnecter pendant 10 minutes.'),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Annuler'),
+            onPressed: () {
+              Navigator.of(context).pop(); // Ferme la boîte de dialogue
+            },
+          ),
+          TextButton(
+            child: Text('Se déconnecter'),
+            onPressed: () {
+              Navigator.of(context).pop(); // Ferme la boîte de dialogue
+              doLogout(); // Procède à la déconnexion
+              Fluttertoast.showToast(
+                  msg: 'Vous pourrez vous reconnecter après 10 minutes',
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 5,
+                  backgroundColor: Colors.orange,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,14 +189,14 @@ Future<void> doLogout() async {
         title: Text(_userLevel, style: TextStyle(color: Colors.white)),
         elevation: 0,
         backgroundColor: Colors.indigoAccent,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () async {
-              // Logique de recherche
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.search),
+        //     onPressed: () async {
+        //       // Logique de recherche
+        //     },
+        //   ),
+        // ],
       ),
       body: Column(
         children: [
@@ -211,7 +255,7 @@ Future<void> doLogout() async {
                         ),
                         title: Text(
                           module.name,
-                          style: TextStyle(color: Colors.indigoAccent),
+                          style: TextStyle(color: Colors.black),
                         ),
                       ),
                     ),
@@ -244,22 +288,9 @@ Future<void> doLogout() async {
             ),
             IconButton(
               icon: Icon(Icons.logout, color: Colors.indigoAccent),
-              onPressed: () async {
+              onPressed: () {
                 print('Logout button pressed');
-                await doLogout();
-                Fluttertoast.showToast(
-                  msg: 'Vous pourrez vous reconnecter après 5 minutes',
-                  toastLength: Toast.LENGTH_LONG,
-                  gravity: ToastGravity.BOTTOM,
-                  timeInSecForIosWeb: 5,
-                  backgroundColor: Colors.orange,
-                  textColor: Colors.white,
-                  fontSize: 16.0,
-                );
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginWidget()),
-                );
+                showLogoutConfirmationDialog(); // Affiche la boîte de dialogue de confirmation
               },
             ),
           ],
@@ -292,7 +323,10 @@ Future<void> doLogout() async {
             ListTile(
               leading: Icon(Icons.home, color: Colors.indigoAccent),
               title: Text('Menu'),
-              onTap: () {},
+              onTap: () {Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DashboardStudent(user: widget.user ?? {})),
+                );},
             ),
             ListTile(
               leading: Icon(Icons.qr_code, color: Colors.indigoAccent),
@@ -317,22 +351,9 @@ Future<void> doLogout() async {
             ListTile(
               leading: Icon(Icons.logout, color: Colors.indigoAccent),
               title: Text('Logout'),
-              onTap: () async {
+              onTap: () {
                 print('Logout menu item pressed');
-                await doLogout();
-                Fluttertoast.showToast(
-                  msg: 'Vous pourrez vous reconnecter après 5 minutes',
-                  toastLength: Toast.LENGTH_LONG,
-                  gravity: ToastGravity.BOTTOM,
-                  timeInSecForIosWeb: 5,
-                  backgroundColor: Colors.orange,
-                  textColor: Colors.white,
-                  fontSize: 16.0,
-                );
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginWidget()),
-                );
+                showLogoutConfirmationDialog(); // Affiche la boîte de dialogue de confirmation
               },
             ),
           ],

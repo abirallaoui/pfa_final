@@ -29,8 +29,8 @@ router.route('/login').post((req, res) => {
                   const currentTime = new Date();
                   const timeDiff = (currentTime - logoutTime) / 1000 / 60; // différence en minutes
 
-                  if (timeDiff < 5) {
-                    res.send(JSON.stringify({success: false, message: 'Veuillez attendre 5 minutes avant de vous reconnecter sur cet appareil'}));
+                  if (timeDiff < 1) {
+                    res.send(JSON.stringify({success: false, message: 'Veuillez attendre 10 minutes avant de vous reconnecter sur cet appareil'}));
                   } else {
                     res.send(JSON.stringify({success: true, user: data}));
                   }
@@ -854,6 +854,122 @@ router.get('/report/:niveauName/:moduleName', (req, res) => {
           });
       });
   });
+});
+
+
+//code hajar changement de mot de passe apres la premiere connexion 
+router.post('/updatepassword', async (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  if (!userId || !newPassword) {
+    return res.status(400).json({ success: false, message: 'Missing userId or newPassword' });
+  }
+
+  try {
+
+      //const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password in 'user' table
+    const updateQueryUser = `
+      UPDATE user
+      SET password = ?,first_login = false
+      WHERE id = ?;
+    `;
+    const updateValuesUser = [newPassword, userId];
+
+    db.query(updateQueryUser, updateValuesUser, (err, results) => {
+      if (err) {
+        console.error('Error executing query:', err);
+        return res.status(500).json({ error: err.message });
+      }
+
+      // Check the role of the user
+      const roleQuery = `
+        SELECT role
+        FROM user
+        WHERE id = ?;
+      `;
+      const roleValues = [userId];
+
+      db.query(roleQuery, roleValues, (err, roleResult) => {
+        if (err) {
+          console.error('Erreur lors de la recherche de l\'ID du user : ', err);
+          return res.status(500).json({ message: 'Erreur lors de la recherche de l\'ID du user' });
+        }
+
+        if (!roleResult || roleResult.length === 0) {
+          return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const userRole = roleResult[0].role;
+        console.log(userRole);
+
+        // Update password in corresponding table based on user role
+        let updateQuery = '';
+        const updateValues = [newPassword, userId]; // Common update values
+
+        switch (userRole) {
+          case 'prof':
+            updateQuery = `
+              UPDATE prof
+              SET password = ?
+              WHERE id = ?;
+            `;
+            break;
+          case 'student':
+            updateQuery = `
+              UPDATE student
+              SET password = ?
+              WHERE id = ?;
+            `;
+            break;
+          case 'admin':
+            updateQuery = `
+              UPDATE admin
+              SET password = ?
+              WHERE id = ?;
+            `;
+            break;
+          default:
+            return res.status(403).json({ success: false, message: 'Unsupported user role' });
+        }
+
+        // Perform the update query
+        if (updateQuery !== '') {
+          db.query(updateQuery, updateValues, (err, results) => {
+            if (err) {
+              console.error('Error executing query:', err);
+              return res.status(500).json({ error: err.message });
+            }
+
+            // Select updated user information from the 'user' table
+            const selectQuery = `
+              SELECT id, email, nom, role
+              FROM user
+              WHERE id = ?;
+            `;
+            const selectValues = [userId];
+
+            db.query(selectQuery, selectValues, (err, result) => {
+              if (err) {
+                console.error('Error executing query:', err);
+                return res.status(500).json({ error: err.message });
+              }
+
+              if (!result || result.length === 0) {
+                return res.status(404).json({ success: false, message: 'User not found' });
+              }
+
+              res.json({ success: true, user: result[0] });
+            });
+          });
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Error in updatePassword:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 });
 
 

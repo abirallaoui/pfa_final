@@ -17,7 +17,7 @@ enum SideBarItem {
   Modules,
   Rapports,
   CodeQR,
-  Profil, RapportsSemestriel,
+  Profil,
 
 }
 final userSessionProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
@@ -42,10 +42,7 @@ class DashboardProf extends ConsumerWidget {
       case SideBarItem.Rapports:
         return RapportsScreen(user: user ?? {});
         
-      case SideBarItem.RapportsSemestriel:
-      // Conversion de l'e-mail du professeur en String
-        String emailProf = user != null ? user!['email'].toString() : '';
-        return SemesterReportScreen(emailProf: emailProf);
+      
       
       case SideBarItem.Profil:
         return ProfilScreen(user: user ?? {});
@@ -65,8 +62,7 @@ class DashboardProf extends ConsumerWidget {
 
   final Map<SideBarItem, IconData> sideBarItemIcons = {
     SideBarItem.Modules: Icons.book,
-    SideBarItem.Rapports: Icons.report,
-        SideBarItem.RapportsSemestriel: Icons.assessment,
+    SideBarItem.Rapports: Icons.assessment,
 
     SideBarItem.CodeQR: Icons.qr_code,
 

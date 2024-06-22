@@ -7,9 +7,9 @@
 
 
     <application
-        android:label="pfa"
+        android:label="E-presence\nEnsao"
         android:name="${applicationName}"
-        android:icon="@mipmap/logo_sans_nom">
+        android:icon="@mipmap/logo_sans_nom_pixir">
         <activity
             android:name=".MainActivity"
             android:exported="true"

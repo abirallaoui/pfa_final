@@ -143,7 +143,32 @@ Future<void> updateUserProfile({
     // Vous pouvez lancer une exception ou retourner un booléen indiquant l'échec
   }
 }
+//changement de mot de passe apres la premiere connexion 
+Future<Map<String, dynamic>> updatePassword(int userId, String newPassword) async {
+  try {
+    final response = await http.post(
+      Uri.parse('${Utils.baseUrl}/crud/updatepassword'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'userId': userId,
+        'newPassword': newPassword,
+      }),
+    );
 
+    if (response.statusCode == 200) {
+      print('Response body: ${response.body}');
+      return jsonDecode(response.body);
+    } else {
+      print('Failed to update password: ${response.statusCode}');
+      throw Exception('Failed to update password');
+    }
+  } catch (e) {
+    print('Error in updatePassword: $e');
+    throw Exception('Failed to update password');
+  }
+}
 
 
 

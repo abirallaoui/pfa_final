@@ -8,6 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pfa/nodejs/rest_api_prof.dart';
 import 'package:pfa/nodejs/utils.dart';
 import 'package:pfa/prof/DashboardProf.dart';
+import 'package:pfa/screens/login/ChangePassword.dart';
 import 'package:pfa/student/DashboardStudent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../admin/DashboardAdmin.dart';
@@ -161,14 +162,22 @@ Future<void> doLogin(String email, String password) async {
   }
 
   void _proceedWithLogin(Map<String, dynamic> res) async {
-    _sharedPreferences = await SharedPreferences.getInstance();
-    String userEmail = res['user'][0]['email'];
-    String userName = res['user'][0]['nom'];
-    int userId = res['user'][0]['id'];
-    _sharedPreferences.setInt('userid', userId);
-    _sharedPreferences.setString('usermail', userEmail);
-    _sharedPreferences.setString('username', userName);
+  _sharedPreferences = await SharedPreferences.getInstance();
+  String userEmail = res['user'][0]['email'];
+  String userName = res['user'][0]['nom'];
+  int userId = res['user'][0]['id'];
+  bool firstLogin = res['user'][0]['first_login'] == 1;
 
+  _sharedPreferences.setInt('userid', userId);
+  _sharedPreferences.setString('usermail', userEmail);
+  _sharedPreferences.setString('username', userName);
+  _sharedPreferences.setBool('first_login', firstLogin);
+
+  if (firstLogin) {
+    // Navigate to ChangePassword screen
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ChangePassword(user: res['user'][0])));
+  } else {
+    // Existing navigation logic
     if (res['user'][0]['role'] == "admin") {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DashboardAdmin(user: res['user'][0])));
     } else if (res['user'][0]['role'] == "prof") {
@@ -177,6 +186,7 @@ Future<void> doLogin(String email, String password) async {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DashboardStudent(user: res['user'][0])));
     }
   }
+}
 
 
   @override
